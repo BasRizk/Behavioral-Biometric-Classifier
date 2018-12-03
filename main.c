@@ -15,7 +15,7 @@ int i=0;
 int count =0;
 
 // Testing by use of word ".tie5Ronal"
-char key[10] = {'.', 't', 'i', 'e','5','R','o','n','a','l','\0'};
+char key[11] = {'.', 't', 'i', 'e','5','R','o','n','a','l','\0'};
 void main (void) {
 	
 	/*------------------------------------------------
@@ -28,24 +28,24 @@ void main (void) {
 	TI = 1; 				// TI: 		set TI to send first char of UART
 	
 	// Allocating space for the data to be saved
-	int r = 9;	// Number of observed calculation
+	//int r = 9;	// Number of observed calculation
 	//int c = 2;	// Number of users
-	double *features = (double *)malloc(r* sizeof(double)); 
+	//double *features = (double *)malloc(r* sizeof(double)); 
  
 	
 	while (1) {
 		char x = _getkey();
-		
 		if (x == key[i]) {
 			i++;
 			if(i % 2 == 0) {
 				
 			}
 		} else {
+			printf("\nAnother Key Pressed\n");
 			i = 0;
 		}
 		
-		if (i == 7) {
+		if (i == 10) {
 			count++;
 			printf("%d", count);
 		}
