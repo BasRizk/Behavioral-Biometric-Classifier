@@ -15,9 +15,8 @@ unsigned char xdata serial_input_buffer [] =
 Timer 1 Overflow Interrupt
 ---------------------------------------------------------*/
 unsigned int T1_ISR_count = 0;
-void T1_ISR(void) interrupt 1 {	
+void T1_ISR(void) interrupt 3 {	
 	T1_ISR_count++;
-	//printf("Interrupt count is : %d\n" , T1_ISR_count);	
 	TF1 = 0; // Reset the interrupt request
 }
 
@@ -67,10 +66,11 @@ void main (void) {
 		if (x == test[i]) {
 			i++;
 			
-			while(INT1){
+			if(INT1 && i > 1){
 				time_btw_ms[i] = 277 * T1_ISR_count;
 				temp = ET1;
-				printf("Letter number %d : %d ,ET1 : %d\n" , i , time_btw_ms[i], temp);	
+				printf("Letter number %d : %d ,ET1 : %d\n" , i , time_btw_ms[i], temp);
+				T1_ISR_count = 0;				
 			}
 		}
 		
