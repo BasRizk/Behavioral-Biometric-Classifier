@@ -21,7 +21,6 @@ void T1_ISR(void) interrupt 3 {
 }
 
 int i=0;
-int count =0;
 
 // Testing by use of word ".tie5Ronal"
 char key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
@@ -31,7 +30,7 @@ char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
 unsigned int time_btw_ms[10];
 
 
-int temp = 0;
+unsigned long int temp = 0;
 
 void main (void) {
 	/*Note : timer takes 277 micro seconds to overflow*/
@@ -63,15 +62,15 @@ void main (void) {
 	
 	while (1) {
 		char x = _getkey();
+		//printf("Count: %u\n" , T1_ISR_count);
 		if (x == test[i]) {
-			i++;
-			
-			if(INT1 && i > 1){
-				time_btw_ms[i] = 277 * T1_ISR_count;
-				temp = ET1;
-				printf("Letter number %d : %d ,ET1 : %d\n" , i , time_btw_ms[i], temp);
-				T1_ISR_count = 0;				
+			temp = ET1;
+			if (i != 0) {
+				time_btw_ms[i-1] = T1_ISR_count;
+				printf("%u\n", time_btw_ms[i-1]);
 			}
+			i++;
+			T1_ISR_count = 0;				
 		}
 		
 		
@@ -81,9 +80,7 @@ void main (void) {
 		}
 		
 		if (i == 10) {
-			count++;
 			//T1_ISR_count = 0;
-			printf("%d\n" , count);
 		}
 
 	}
