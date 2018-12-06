@@ -27,13 +27,16 @@ char key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
 char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
 
 // Array to save time intervals between each user press
-unsigned int time_btw_ms[10];
+unsigned int time_between_chars_typed_userA[10];
+unsigned int time_between_chars_typed_userB[10];
+unsigned int time_between_chars_typed_recognize[10];
 
 
-unsigned long int temp = 0;
-
+int trials_num = 5;
+int states_bit = 0;		//0 means userA training phase, 1 means userB training phase, 2 means entering test phase  
+	
 void main (void) {
-	/*Note : timer takes 277 micro seconds to overflow*/
+	/*Note : timer takes 135 micro seconds to overflow*/
 	
 	
 	/*------------------------------------------------
@@ -57,17 +60,28 @@ void main (void) {
 	//int r = 9;	// Number of observed calculation
 	//int c = 2;	// Number of users
 	//float *features = (float *)malloc(r* sizeof(float));
-	
+	printf("User A enters Sequance 1234567890 5 times\n");
 	
 	
 	while (1) {
 		char x = _getkey();
-		//printf("Count: %u\n" , T1_ISR_count);
+		
+		if(states_bit == 0 && trials_num == 0){
+			trials_num = 5;   //Setting number of trials for user B training 
+			states_bit = 1;		//finished training user A and entering training user B
+		}
+		else if(states_bit == 1 && trials_num == 0)
+			states_bit = 2;		//finished training user B and entering test phase
+		
+		
 		if (x == test[i]) {
-			temp = ET1;
-			if (i != 0) {
-				time_btw_ms[i-1] = T1_ISR_count;
-				printf("%u\n", time_btw_ms[i-1]);
+			if (i != 0 && states_bit == 0) {
+				time_between_chars_typed_userA[i-1] = T1_ISR_count;
+				printf("%u\n", time_between_chars_typed_userA[i-1]);
+			}
+			else if(i != 0 && states_bit == 1) {
+				time_between_chars_typed_userB[i-1] = T1_ISR_count;
+				printf("%u\n", time_between_chars_typed_userB[i-1]);	
 			}
 			i++;
 			T1_ISR_count = 0;				
@@ -80,8 +94,15 @@ void main (void) {
 		}
 		
 		if (i == 10) {
-			//T1_ISR_count = 0;
+			i = 0;
+			if(states_bit == 0 || states_bit == 1)
+				trials_num --;
+			if(states_bit == 0 && trials_num == 0){
+				printf("user A finished training phase\nNow user B enters 1234567890 5 times\n");
+			}
+			else if(states_bit == 1 && trials_num == 0){
+				printf("user B finished training phase\nNow any user enters 1234567890\n");
+			}
 		}
-
 	}
 }

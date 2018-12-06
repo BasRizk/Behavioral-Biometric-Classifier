@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              12/05/2018 19:30:49 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              12/06/2018 21:22:30 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -37,74 +37,101 @@ line level    source
   27          char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
   28          
   29          // Array to save time intervals between each user press
-  30          unsigned int time_btw_ms[10];
-  31          
-  32          
-  33          unsigned long int temp = 0;
+  30          unsigned int time_between_chars_typed_userA[10];
+  31          unsigned int time_between_chars_typed_userB[10];
+  32          unsigned int time_between_chars_typed_recognize[10];
+  33          
   34          
-  35          void main (void) {
-  36   1        /*Note : timer takes 277 micro seconds to overflow*/
-  37   1        
-  38   1        
-  39   1        /*------------------------------------------------
-  40   1          Setup the timer 1 to start in mode 2 with auto reload value of 0.
-  41   1        ------------------------------------------------*/
-  42   1                  // Setting the global interrupt
-  43   1        SCON = 0x50;    // SCON:  mode 1, 8-bit UART, enable receiver
-  44   1        TMOD |= 0x20;   // TMOD:  timer 1, mode 2, 16-bit 
-  45   1        TH1 = 0x00;     // TH1:   Seting timer auto reload value to 0
-  46   1        TR1 = 1;        // TR1:   timer 1 run
-  47   1        TI = 1;         // TI:    set TI to send first char of UART
-  48   1        IT1 = 0;
-  49   1        //PCON |= 0x80;
-  50   1        
-  51   1        /*--------------------------------------
-  52   1          Enable interrupts for timer 1.
-  53   1        --------------------------------------*/
-  54   1        ET1 = 1;        // Setting Timer 1 interrupt
-C51 COMPILER V9.59.0.0   MAIN                                                              12/05/2018 19:30:49 PAGE 2   
+  35          
+  36          unsigned long int temp = 0;
+  37          
+  38          int trials_num = 5;
+  39          int states_bit = 0;   //0 means userA training phase, 1 means userB training phase, 2 means entering test p
+             -hase  
+  40            
+  41          void main (void) {
+  42   1        /*Note : timer takes 135 micro seconds to overflow*/
+  43   1        
+  44   1        
+  45   1        /*------------------------------------------------
+  46   1          Setup the timer 1 to start in mode 2 with auto reload value of 0.
+  47   1        ------------------------------------------------*/
+  48   1                  // Setting the global interrupt
+  49   1        SCON = 0x50;    // SCON:  mode 1, 8-bit UART, enable receiver
+  50   1        TMOD |= 0x20;   // TMOD:  timer 1, mode 2, 16-bit 
+  51   1        TH1 = 0x00;     // TH1:   Seting timer auto reload value to 0
+  52   1        TR1 = 1;        // TR1:   timer 1 run
+  53   1        TI = 1;         // TI:    set TI to send first char of UART
+C51 COMPILER V9.59.0.0   MAIN                                                              12/06/2018 21:22:30 PAGE 2   
 
-  55   1        EA = 1; 
-  56   1        // Allocating space for the data to be saved
-  57   1        //int r = 9;  // Number of observed calculation
-  58   1        //int c = 2;  // Number of users
-  59   1        //float *features = (float *)malloc(r* sizeof(float));
-  60   1        
-  61   1        
-  62   1        
-  63   1        while (1) {
-  64   2          char x = _getkey();
-  65   2          //printf("Count: %u\n" , T1_ISR_count);
-  66   2          if (x == test[i]) {
-  67   3            temp = ET1;
-  68   3            if (i != 0) {
-  69   4              time_btw_ms[i-1] = T1_ISR_count;
-  70   4              printf("%u\n", time_btw_ms[i-1]);
-  71   4            }
-  72   3            i++;
-  73   3            T1_ISR_count = 0;       
-  74   3          }
-  75   2          
-  76   2          
-  77   2           else { 
-  78   3            printf("Another Key Pressed\n");
-  79   3            i = 0;
-  80   3          }
-  81   2          
-  82   2          if (i == 10) {
-  83   3            //T1_ISR_count = 0;
-  84   3          }
-  85   2      
-  86   2        }
-  87   1      }
+  54   1        IT1 = 0;
+  55   1        //PCON |= 0x80;
+  56   1        
+  57   1        /*--------------------------------------
+  58   1          Enable interrupts for timer 1.
+  59   1        --------------------------------------*/
+  60   1        ET1 = 1;        // Setting Timer 1 interrupt
+  61   1        EA = 1; 
+  62   1        // Allocating space for the data to be saved
+  63   1        //int r = 9;  // Number of observed calculation
+  64   1        //int c = 2;  // Number of users
+  65   1        //float *features = (float *)malloc(r* sizeof(float));
+  66   1        printf("User A enters Sequance 1234567890 5 times\n");
+  67   1        
+  68   1        
+  69   1        while (1) {
+  70   2          char x = _getkey();
+  71   2          
+  72   2          if(states_bit == 0 && trials_num == 0){
+  73   3            trials_num = 5;   //Setting number of trials for user B training 
+  74   3            states_bit = 1;   //finished training user A and entering training user B
+  75   3          }
+  76   2          else if(states_bit == 1 && trials_num == 0)
+  77   2            states_bit = 2;   //finished training user B and entering test phase
+  78   2          
+  79   2          
+  80   2          if (x == test[i]) {
+  81   3            if (i != 0 && states_bit == 0) {
+  82   4              time_between_chars_typed_userA[i-1] = T1_ISR_count;
+  83   4              printf("%u\n", time_between_chars_typed_userA[i-1]);
+  84   4            }
+  85   3            else if(i != 0 && states_bit == 1) {
+  86   4              time_between_chars_typed_userB[i-1] = T1_ISR_count;
+  87   4              printf("%u\n", time_between_chars_typed_userB[i-1]);  
+  88   4            }
+  89   3            i++;
+  90   3            T1_ISR_count = 0;       
+  91   3          }
+  92   2          
+  93   2          
+  94   2           else { 
+  95   3            printf("Another Key Pressed\n");
+  96   3            i = 0;
+  97   3          }
+  98   2          
+  99   2          if (i == 10) {
+ 100   3            i = 0;
+ 101   3            if(states_bit == 0 || states_bit == 1)
+ 102   3              trials_num --;
+ 103   3            if(states_bit == 0 && trials_num == 0){
+ 104   4              printf("user A finished training phase\nNow user B enters 1234567890 5 times\n");
+ 105   4            }
+ 106   3            else if(states_bit == 1 && trials_num == 0){
+ 107   4              printf("user B finished training phase\nNow any user enters 1234567890\n");
+ 108   4            }
+ 109   3          }
+ 110   2        }
+ 111   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    141    ----
-   CONSTANT SIZE    =     25    ----
+   CODE SIZE        =    310    ----
+C51 COMPILER V9.59.0.0   MAIN                                                              12/06/2018 21:22:30 PAGE 3   
+
+   CONSTANT SIZE    =    200    ----
    XDATA SIZE       =     88    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     50       1
+   DATA SIZE        =     94       1
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
