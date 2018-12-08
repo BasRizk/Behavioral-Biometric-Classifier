@@ -5,11 +5,6 @@
 The following string is the stuff we're gonna
 send into the serial port.
 ------------------------------------------------*/
-unsigned char xdata serial_input_buffer [] =
-"This is a test to see if this data gets "
-"injected into the serial port.\r\n"
-"Have fun.\r\n"
-"\r\n\r\n";
 
 /*---------------------------------------------------------
 Timer 1 Overflow Interrupt
@@ -20,17 +15,17 @@ void T1_ISR(void) interrupt 3 {
 	TF1 = 0; // Reset the interrupt request
 }
 
-int key_i=0;
+unsigned char key_i=0;
 
 // Testing by use of word ".tie5Ronal"
-//char key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
+//char xdata key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
 char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
 
 // Arrays to save time intervals between each user press
-unsigned int time_between_chars_typed_userA[10];
-unsigned int time_between_chars_typed_userB[10];
-unsigned int time_between_chars_typed_recognize[10];
 
+
+unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
+unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
 
 unsigned char trials_num = 5;	// # of entries needed to be entered by current user
 
@@ -40,8 +35,14 @@ unsigned char trials_num = 5;	// # of entries needed to be entered by current us
 // 2 :means entering test phase  
 unsigned char states_bit = 0;
 
+
+
 	
 void main (void) {
+	int time_between_chars_typed_userA[10];
+	int time_between_chars_typed_userB[10];
+	int time_between_chars_typed_recognize[10];
+	
 	/*Note : timer takes 135 micro seconds to overflow*/
 	
 	
@@ -65,12 +66,13 @@ void main (void) {
 
 
 	// Program Logic follows
-	printf("User A, Please enter the following Sequance 5 times:\n '1234567890' \n");
-	
+	printf("User A,Enter '1234567890' 5 times\n");
+	//printf("#%u Entry\n", trials_num);
+
 	while (1) {
 		
+
 		char x = _getkey();
-		printf("#%d Entry", trials_num);
 		
 		if(states_bit == 0 && trials_num == 0){
 			// Just got last entry by User A @(Training Session)
@@ -87,23 +89,23 @@ void main (void) {
 		if (x == test[key_i]) {
 			// a Key was pressed Logic
 			if (key_i != 0 && states_bit == 0) {
-				time_between_chars_typed_userA[key_i-1] = T1_ISR_count;
-				printf("%u\n", time_between_chars_typed_userA[key_i-1]);
+				time_between_chars_typed_userA[key_i-1] += (T1_ISR_count / 5);
+				//printf("%u\n", time_between_chars_typed_userA[key_i-1]);
 			
 			} else if(key_i != 0 && states_bit == 1) {
-				time_between_chars_typed_userB[key_i-1] = T1_ISR_count;
-				printf("%u\n", time_between_chars_typed_userB[key_i-1]);	
+				time_between_chars_typed_userB[key_i-1] += (T1_ISR_count / 5);
+				//printf("%u\n", time_between_chars_typed_userB[key_i-1]);	
 				
-			} else {
+			} else if( key_i != 0 && states_bit == 2) {
 				time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
-				printf("%u\n", time_between_chars_typed_recognize[key_i-1]);	
+				//printf("%u\n", time_between_chars_typed_recognize[key_i-1]);	
 				
 			}				
 			key_i++;
 			T1_ISR_count = 0;				
 	
 		} else { 
-			printf("Another key pressed; Repeat from the beginning of the sequence.\n");
+			printf("Repeat\n");
 			key_i = 0;
 			// TODO does the counter reset in this case?
 		}
@@ -118,31 +120,34 @@ void main (void) {
 				trials_num --;
 			
 			if(states_bit == 0 && trials_num == 0){
-				printf("User A finished training phase\n");
-				printf("Now User B, Please enter the following Sequance 5 times:\n '1234567890' \n");
+				printf("%s\n" , msg1);
 				
 			} else if(states_bit == 1 && trials_num == 0){
-				printf("User B finished training phase\n");
-				printf("Now any user enters 1234567890 and wait for detection\n");
+				printf("%s\n", msg2);
 		
 			} else if(states_bit == 2) {
 				// Detection Logic
 				unsigned char feature_i = 0;
-				unsigned short error_sum = 0;
+				
+				int error_diff = 0;
+				long sum_sq_err_A = 0;
+				
+				long sum_sq_err_B = 0;
 				
 				for(; feature_i < 10; feature_i++) {
-		
-					error_sum += (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_i]);
-					error_sum -= (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_i]);
+					error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_i]);
+					sum_sq_err_A += (error_diff*error_diff);
+					
+					error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_i]);
+					sum_sq_err_B += (error_diff*error_diff);
 				}
 				
-				if(error_sum > 0) {
-					printf("This was probably User B.");
-				} else if (error_sum < 0) {
-					printf("This was probably User A.");
+				if(sum_sq_err_A > sum_sq_err_B) {
+					printf("User B\n");
 				} else {
-					printf("Oh! no I can not take a guess!");
-				}
+					printf("User A\n");
+				} 
+				//printf("Oh! no I can not take a guess!");
 				
 			}
 			
