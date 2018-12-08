@@ -33,8 +33,8 @@ void T1_ISR(void) interrupt 3 {
 unsigned char key_i=0;
 
 // Testing by use of word ".tie5Ronal"
-//char xdata key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
-signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
+signed char test[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
+//signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
 
 
 // Arrays to save time intervals between each user press
@@ -130,10 +130,10 @@ void main (void) {
 			}				
 			key_i++;		
 	
-		} else if(x == ','){ // Toggle Modes
+		} else if(x == '['){ // Toggle Modes
 			states_bit = (states_bit ^ 0x02) & 0xFE;
 			states_interupt = states_bit;
-		}	else if( (x == '.') && (~(states_bit & 0x02))){ // Toggle Users in training Mode
+		}	else if( (x == ']') && (~(states_bit & 0x02))){ // Toggle Users in training Mode
 			states_bit = (states_bit ^ 0x01);
 			states_interupt = states_bit;
 		} else { 
