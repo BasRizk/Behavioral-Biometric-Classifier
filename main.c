@@ -33,17 +33,19 @@ signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
 
 // Arrays to save time intervals between each user press
 
-unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
-unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
+//unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
+//unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
 
-unsigned char trials_num = 5;	// # of entries needed to be entered by current user
+unsigned char xdata msg [3][20] = {"Train A, Trials:", "Train B, Trials:", "Test Mode"};
+unsigned char trials [3] = {0,0,0};	// # of entries needed to be entered by current user
 
 
 // state_bit
-// 0 :userA training phase
-// 1 :means userB training phase
-// 2 :means entering test phase  
+// 0 :Training userA 
+// 1 :Training userB
+// 2 :Test Phase 
 unsigned char states_bit = 0;
+unsigned char states_interupt = 0;
 	
 
 
@@ -82,32 +84,34 @@ void main (void) {
 	// Program Logic follows
 	//printf("User A,Enter '1234567890' 5 times\n");
 	//printf("#%u Entry\n", trials_num);
+	
 
 	while (1) {
 		
-
-		signed char x = _getkey();
-		
-		if((states_bit == 0) && (trials_num == 0)){
+		signed char x;
+//		if((trials_num == 0)){
 			// Just got last entry by User A @(Training Session)
-			trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
-			states_bit = 1;		// Set to User B (Training Session) 
+//			trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
+//			states_bit = (states_bit ^ 0x01);		// Set to User B (Training Session) 
+//			states_interupt = states_bit;
+//		}	
 		
-		} else if((states_bit == 1) && (trials_num == 0) ) {
-			// Just got last entry by User B @(Training Session)
-			states_bit = 2; // Set to (Test Session)
-			
+		if(states_interupt != 0xFF){
+				printf("%s %u\n" , msg[states_interupt],(unsigned int) trials[states_interupt]);
+				states_interupt = 0xFF;
 		}
 		
+		x = _getkey();
+			
 		
 		if (x == test[key_i]) {
 			// a Key was pressed Logic
 			if ((key_i != 0) && (states_bit == 0)) {
-				time_between_chars_typed_userA[key_i-1] += (T1_ISR_count / 5);
+				time_between_chars_typed_userA[key_i-1] += (T1_ISR_count);
 				//printf("%u\n", time_between_chars_typed_userA[key_i-1]);
 			
 			} else if((key_i != 0) && (states_bit == 1)) {
-				time_between_chars_typed_userB[key_i-1] += (T1_ISR_count / 5);
+				time_between_chars_typed_userB[key_i-1] += (T1_ISR_count);
 				//printf("%u\n", time_between_chars_typed_userB[key_i-1]);	
 				
 			} else if( (key_i != 0) && (states_bit == 2)) {
@@ -117,6 +121,12 @@ void main (void) {
 			}				
 			key_i++;		
 	
+		} else if(x == ','){ // Toggle Modes
+			states_bit = (states_bit ^ 0x02) & 0xFE;
+			states_interupt = states_bit;
+		}	else if( (x == '.') && (~(states_bit & 0x02))){ // Toggle Users in training Mode
+			states_bit = (states_bit ^ 0x01);
+			states_interupt = states_bit;
 		} else { 
 			printf("%c\n", test[key_i]);
 			//key_i = 0;
@@ -124,23 +134,21 @@ void main (void) {
 		}
 		
 		T1_ISR_count = 0;
-		
-		
+				
 		if (key_i == 10) {
 			// Sequence entered correctly Logic
 			key_i = 0;
 			
-			if((states_bit == 0) || (states_bit == 1))
-				// It is a (Training Session)
-				trials_num --;
-			
-			if((states_bit == 0) && (trials_num == 0)){
-				printf("%s\n" , msg1);
+			if((states_bit == 0) || (states_bit == 1)){
 				
-			} else if((states_bit == 1) && (trials_num == 0)){
-				printf("%s\n", msg2);
-		
-			} else if(states_bit == 2) {
+				// It is a (Training Session)
+				trials[states_bit]++;
+				states_interupt = states_bit;
+			}
+			
+			
+
+			if(states_bit == 2) {
 				// Detection Logic
 								
 				unsigned char feature_i = 0;
@@ -152,10 +160,10 @@ void main (void) {
 				
 				
 				for(; feature_i < 10; feature_i++) {
-					error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_i]);
+					error_diff = (time_between_chars_typed_recognize[feature_i] - (time_between_chars_typed_userA[feature_i] / trials[0]));
 					sum_sq_err_A += (error_diff*error_diff);
 					
-					error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_i]);
+					error_diff = (time_between_chars_typed_recognize[feature_i] - (time_between_chars_typed_userB[feature_i] / trials[1]));
 					sum_sq_err_B += (error_diff*error_diff);
 				}
 				

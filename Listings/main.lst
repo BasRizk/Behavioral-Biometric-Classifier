@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 21:12:24 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:29:55 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -43,162 +43,170 @@ line level    source
   33          
   34          // Arrays to save time intervals between each user press
   35          
-  36          unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
-  37          unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
+  36          //unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
+  37          //unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
   38          
-  39          unsigned char trials_num = 5; // # of entries needed to be entered by current user
-  40          
+  39          unsigned char xdata msg [3][20] = {"Train A, Trials:", "Train B, Trials:", "Test Mode"};
+  40          unsigned char trials [3] = {0,0,0}; // # of entries needed to be entered by current user
   41          
-  42          // state_bit
-  43          // 0 :userA training phase
-  44          // 1 :means userB training phase
-  45          // 2 :means entering test phase  
-  46          unsigned char states_bit = 0;
-  47            
-  48          
-  49          
-  50          void main (void) {
-  51   1        unsigned int time_between_chars_typed_userA[10];
-  52   1        unsigned int time_between_chars_typed_userB[10];
-  53   1        unsigned int time_between_chars_typed_recognize[10];
-  54   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 21:12:24 PAGE 2   
+  42          
+  43          // state_bit
+  44          // 0 :Training userA 
+  45          // 1 :Training userB
+  46          // 2 :Test Phase 
+  47          unsigned char states_bit = 0;
+  48          unsigned char states_interupt = 0;
+  49            
+  50          
+  51          
+  52          void main (void) {
+  53   1        unsigned int time_between_chars_typed_userA[10];
+  54   1        unsigned int time_between_chars_typed_userB[10];
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:29:55 PAGE 2   
 
-  55   1      
-  56   1        //P1_1 = ~P1_1;
-  57   1        //flash_counter = 4;
-  58   1      
-  59   1        
-  60   1        /*Note : timer takes 135 micro seconds to overflow*/
+  55   1        unsigned int time_between_chars_typed_recognize[10];
+  56   1        
+  57   1      
+  58   1        //P1_1 = ~P1_1;
+  59   1        //flash_counter = 4;
+  60   1      
   61   1        
-  62   1        
-  63   1        /*------------------------------------------------
-  64   1          Setup the timer 1 to start in mode 2 with auto reload value of 0.
-  65   1        ------------------------------------------------*/
-  66   1                  // Setting the global interrupt
-  67   1        SCON = 0x50;    // SCON:  mode 1, 8-bit UART, enable receiver
-  68   1        TMOD |= 0x20;   // TMOD:  timer 1, mode 2, 16-bit 
-  69   1        TH1 = 0x00;     // TH1:   Seting timer auto reload value to 0
-  70   1        TR1 = 1;        // TR1:   timer 1 run
-  71   1        TI = 1;         // TI:    set TI to send first char of UART
-  72   1        IT1 = 0;
-  73   1        //PCON |= 0x80;
-  74   1        
-  75   1        /*--------------------------------------
-  76   1          Enable interrupts for timer 1.
-  77   1        --------------------------------------*/
-  78   1        ET1 = 1;        // Setting Timer 1 interrupt
-  79   1        EA = 1; 
-  80   1      
-  81   1      
-  82   1        // Program Logic follows
-  83   1        //printf("User A,Enter '1234567890' 5 times\n");
-  84   1        //printf("#%u Entry\n", trials_num);
-  85   1      
-  86   1        while (1) {
-  87   2          
-  88   2      
-  89   2          signed char x = _getkey();
+  62   1        /*Note : timer takes 135 micro seconds to overflow*/
+  63   1        
+  64   1        
+  65   1        /*------------------------------------------------
+  66   1          Setup the timer 1 to start in mode 2 with auto reload value of 0.
+  67   1        ------------------------------------------------*/
+  68   1                  // Setting the global interrupt
+  69   1        SCON = 0x50;    // SCON:  mode 1, 8-bit UART, enable receiver
+  70   1        TMOD |= 0x20;   // TMOD:  timer 1, mode 2, 16-bit 
+  71   1        TH1 = 0x00;     // TH1:   Seting timer auto reload value to 0
+  72   1        TR1 = 1;        // TR1:   timer 1 run
+  73   1        TI = 1;         // TI:    set TI to send first char of UART
+  74   1        IT1 = 0;
+  75   1        //PCON |= 0x80;
+  76   1        
+  77   1        /*--------------------------------------
+  78   1          Enable interrupts for timer 1.
+  79   1        --------------------------------------*/
+  80   1        ET1 = 1;        // Setting Timer 1 interrupt
+  81   1        EA = 1; 
+  82   1      
+  83   1      
+  84   1        // Program Logic follows
+  85   1        //printf("User A,Enter '1234567890' 5 times\n");
+  86   1        //printf("#%u Entry\n", trials_num);
+  87   1        
+  88   1      
+  89   1        while (1) {
   90   2          
-  91   2          if((states_bit == 0) && (trials_num == 0)){
-  92   3            // Just got last entry by User A @(Training Session)
-  93   3            trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
-  94   3            states_bit = 1;   // Set to User B (Training Session) 
-  95   3          
-  96   3          } else if((states_bit == 1) && (trials_num == 0) ) {
-  97   3            // Just got last entry by User B @(Training Session)
-  98   3            states_bit = 2; // Set to (Test Session)
-  99   3            
- 100   3          }
- 101   2          
- 102   2          
- 103   2          if (x == test[key_i]) {
- 104   3            // a Key was pressed Logic
- 105   3            if ((key_i != 0) && (states_bit == 0)) {
- 106   4              time_between_chars_typed_userA[key_i-1] += (T1_ISR_count / 5);
- 107   4              //printf("%u\n", time_between_chars_typed_userA[key_i-1]);
- 108   4            
- 109   4            } else if((key_i != 0) && (states_bit == 1)) {
- 110   4              time_between_chars_typed_userB[key_i-1] += (T1_ISR_count / 5);
- 111   4              //printf("%u\n", time_between_chars_typed_userB[key_i-1]);  
- 112   4              
- 113   4            } else if( (key_i != 0) && (states_bit == 2)) {
- 114   4              time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
- 115   4              //printf("%u\n", time_between_chars_typed_recognize[key_i-1]);  
+  91   2          signed char x;
+  92   2      //    if((trials_num == 0)){
+  93   2            // Just got last entry by User A @(Training Session)
+  94   2      //      trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
+  95   2      //      states_bit = (states_bit ^ 0x01);   // Set to User B (Training Session) 
+  96   2      //      states_interupt = states_bit;
+  97   2      //    } 
+  98   2          
+  99   2          if(states_interupt != 0xFF){
+ 100   3              printf("%s %u\n" , msg[states_interupt],(unsigned int) trials[states_interupt]);
+ 101   3              states_interupt = 0xFF;
+ 102   3          }
+ 103   2          
+ 104   2          x = _getkey();
+ 105   2            
+ 106   2          
+ 107   2          if (x == test[key_i]) {
+ 108   3            // a Key was pressed Logic
+ 109   3            if ((key_i != 0) && (states_bit == 0)) {
+ 110   4              time_between_chars_typed_userA[key_i-1] += (T1_ISR_count);
+ 111   4              //printf("%u\n", time_between_chars_typed_userA[key_i-1]);
+ 112   4            
+ 113   4            } else if((key_i != 0) && (states_bit == 1)) {
+ 114   4              time_between_chars_typed_userB[key_i-1] += (T1_ISR_count);
+ 115   4              //printf("%u\n", time_between_chars_typed_userB[key_i-1]);  
  116   4              
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 21:12:24 PAGE 3   
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:29:55 PAGE 3   
 
- 117   4            }       
- 118   3            key_i++;    
- 119   3        
- 120   3          } else { 
- 121   3            printf("%c\n", test[key_i]);
- 122   3            //key_i = 0;
- 123   3            // TODO does the counter reset in this case?
- 124   3          }
- 125   2          
- 126   2          T1_ISR_count = 0;
- 127   2          
- 128   2          
- 129   2          if (key_i == 10) {
- 130   3            // Sequence entered correctly Logic
- 131   3            key_i = 0;
- 132   3            
- 133   3            if((states_bit == 0) || (states_bit == 1))
- 134   3              // It is a (Training Session)
- 135   3              trials_num --;
- 136   3            
- 137   3            if((states_bit == 0) && (trials_num == 0)){
- 138   4              printf("%s\n" , msg1);
- 139   4              
- 140   4            } else if((states_bit == 1) && (trials_num == 0)){
- 141   4              printf("%s\n", msg2);
- 142   4          
- 143   4            } else if(states_bit == 2) {
- 144   4              // Detection Logic
- 145   4                      
- 146   4              unsigned char feature_i = 0;
- 147   4              
- 148   4              signed int error_diff = 0;
- 149   4              
- 150   4              unsigned long int sum_sq_err_A = 0;
- 151   4              unsigned long int sum_sq_err_B = 0;
- 152   4              
- 153   4              
- 154   4              for(; feature_i < 10; feature_i++) {
- 155   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_
-             -i]);
- 156   5                sum_sq_err_A += (error_diff*error_diff);
- 157   5                
- 158   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_
-             -i]);
- 159   5                sum_sq_err_B += (error_diff*error_diff);
- 160   5              }
+ 117   4            } else if( (key_i != 0) && (states_bit == 2)) {
+ 118   4              time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
+ 119   4              //printf("%u\n", time_between_chars_typed_recognize[key_i-1]);  
+ 120   4              
+ 121   4            }       
+ 122   3            key_i++;    
+ 123   3        
+ 124   3          } else if(x == ','){ // Toggle Modes
+ 125   3            states_bit = (states_bit ^ 0x02) & 0xFE;
+ 126   3            states_interupt = states_bit;
+ 127   3          } else if( (x == '.') && (~(states_bit & 0x02))){ // Toggle Users in training Mode
+ 128   3            states_bit = (states_bit ^ 0x01);
+ 129   3            states_interupt = states_bit;
+ 130   3          } else { 
+ 131   3            printf("%c\n", test[key_i]);
+ 132   3            //key_i = 0;
+ 133   3            // TODO does the counter reset in this case?
+ 134   3          }
+ 135   2          
+ 136   2          T1_ISR_count = 0;
+ 137   2              
+ 138   2          if (key_i == 10) {
+ 139   3            // Sequence entered correctly Logic
+ 140   3            key_i = 0;
+ 141   3            
+ 142   3            if((states_bit == 0) || (states_bit == 1)){
+ 143   4              
+ 144   4              // It is a (Training Session)
+ 145   4              trials[states_bit]++;
+ 146   4              states_interupt = states_bit;
+ 147   4            }
+ 148   3            
+ 149   3            
+ 150   3      
+ 151   3            if(states_bit == 2) {
+ 152   4              // Detection Logic
+ 153   4                      
+ 154   4              unsigned char feature_i = 0;
+ 155   4              
+ 156   4              signed int error_diff = 0;
+ 157   4              
+ 158   4              unsigned long int sum_sq_err_A = 0;
+ 159   4              unsigned long int sum_sq_err_B = 0;
+ 160   4              
  161   4              
- 162   4              if(sum_sq_err_A > sum_sq_err_B) {
- 163   5                printf("User B\n");
- 164   5                flash_counter = 4;
- 165   5              } else {
- 166   5                printf("User A\n");
- 167   5                flash_counter = 2;
- 168   5              } 
- 169   4              //printf("Oh! no I can not take a guess!");
- 170   4              
- 171   4            }
- 172   3            
- 173   3          }
- 174   2        }
- 175   1      }
+ 162   4              for(; feature_i < 10; feature_i++) {
+ 163   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_
+             -i] / trials[0]);
+ 164   5                sum_sq_err_A += (error_diff*error_diff);
+ 165   5                
+ 166   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_
+             -i] / trials[1]);
+ 167   5                sum_sq_err_B += (error_diff*error_diff);
+ 168   5              }
+ 169   4              
+ 170   4              if(sum_sq_err_A > sum_sq_err_B) {
+ 171   5                printf("User B\n");
+ 172   5                flash_counter = 4;
+ 173   5              } else {
+ 174   5                printf("User A\n");
+ 175   5                flash_counter = 2;
+ 176   5              } 
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:29:55 PAGE 4   
 
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 21:12:24 PAGE 4   
+ 177   4              //printf("Oh! no I can not take a guess!");
+ 178   4              
+ 179   4            }
+ 180   3            
+ 181   3          }
+ 182   2        }
+ 183   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    537    ----
-   CONSTANT SIZE    =     24    ----
-   XDATA SIZE       =    112    ----
+   CODE SIZE        =    543    ----
+   CONSTANT SIZE    =     27    ----
+   XDATA SIZE       =     60    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     19      72
+   DATA SIZE        =     22      72
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
