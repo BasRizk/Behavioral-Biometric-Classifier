@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:29:55 PAGE 1   
+=======
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 22:54:08 PAGE 1   
+>>>>>>> d2ec912b40bab2559e0f1540fae5289f7d92a84b
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -13,33 +17,34 @@ line level    source
    3          sbit P1_1 = 0x91;  // Port 1.1 SFR bit
    4          unsigned char flash_counter = 4;
    5          unsigned int flash_timer = 0;
-   6          
-   7          /*------------------------------------------------
-   8          The following string is the stuff we're gonna
-   9          send into the serial port.
-  10          ------------------------------------------------*/
-  11          
-  12          /*---------------------------------------------------------
-  13          Timer 1 Overflow Interrupt
-  14          ---------------------------------------------------------*/
-  15          unsigned int T1_ISR_count = 0;
-  16          void T1_ISR(void) interrupt 3 { 
-  17   1        T1_ISR_count++;
-  18   1        if((flash_timer >= 5000) && (flash_counter > 0)){
-  19   2            P1_1 = ~P1_1;
-  20   2            flash_counter--;
-  21   2            flash_timer = 0;
-  22   2        }   
-  23   1        flash_timer++;
-  24   1        TF1 = 0; // Reset the interrupt request
-  25   1      }
-  26          
-  27          unsigned char key_i=0;
-  28          
-  29          // Testing by use of word ".tie5Ronal"
-  30          //char xdata key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
-  31          signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
+   6          unsigned char splitter = 0;
+   7          
+   8          /*------------------------------------------------
+   9          The following string is the stuff we're gonna
+  10          send into the serial port.
+  11          ------------------------------------------------*/
+  12          
+  13          /*---------------------------------------------------------
+  14          Timer 1 Overflow Interrupt
+  15          ---------------------------------------------------------*/
+  16          unsigned int T1_ISR_count = 0;
+  17          void T1_ISR(void) interrupt 3 {
+  18   1      
+  19   1        if(splitter == 20) {
+  20   2          T1_ISR_count++;
+  21   2          splitter = 0;
+  22   2        }
+  23   1        splitter++;
+  24   1        if((flash_timer >= 5000) && (flash_counter > 0)){
+  25   2            P1_1 = ~P1_1;
+  26   2            flash_counter--;
+  27   2            flash_timer = 0;
+  28   2        }   
+  29   1        flash_timer++;
+  30   1        TF1 = 0; // Reset the interrupt request
+  31   1      }
   32          
+<<<<<<< HEAD
   33          
   34          // Arrays to save time intervals between each user press
   35          
@@ -207,6 +212,173 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    XDATA SIZE       =     60    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =     22      72
+=======
+  33          unsigned char key_i=0;
+  34          
+  35          // Testing by use of word ".tie5Ronal"
+  36          //char xdata key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
+  37          signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
+  38          
+  39          
+  40          // Arrays to save time intervals between each user press
+  41          
+  42          unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
+  43          unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
+  44          
+  45          unsigned char trials_num = 5; // # of entries needed to be entered by current user
+  46          
+  47          
+  48          // state_bit
+  49          // 0 :userA training phase
+  50          // 1 :means userB training phase
+  51          // 2 :means entering test phase  
+  52          unsigned char states_bit = 0;
+  53            
+  54          
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 22:54:08 PAGE 2   
+
+  55          
+  56          void main (void) {
+  57   1        unsigned int time_between_chars_typed_userA[10];
+  58   1        unsigned int time_between_chars_typed_userB[10];
+  59   1        unsigned int time_between_chars_typed_recognize[10];
+  60   1        
+  61   1      
+  62   1        //P1_1 = ~P1_1;
+  63   1        //flash_counter = 4;
+  64   1      
+  65   1        
+  66   1        /*Note : timer takes 135 micro seconds to overflow*/
+  67   1        
+  68   1        
+  69   1        /*------------------------------------------------
+  70   1          Setup the timer 1 to start in mode 2 with auto reload value of 0.
+  71   1        ------------------------------------------------*/
+  72   1                  // Setting the global interrupt
+  73   1        SCON = 0x50;    // SCON:  mode 1, 8-bit UART, enable receiver
+  74   1        TMOD |= 0x20;   // TMOD:  timer 1, mode 2, 16-bit 
+  75   1        TH1 = 0x00;     // TH1:   Seting timer auto reload value to 0
+  76   1        TR1 = 1;        // TR1:   timer 1 run
+  77   1        TI = 1;         // TI:    set TI to send first char of UART
+  78   1        IT1 = 0;
+  79   1        //PCON |= 0x80;
+  80   1        
+  81   1        /*--------------------------------------
+  82   1          Enable interrupts for timer 1.
+  83   1        --------------------------------------*/
+  84   1        ET1 = 1;        // Setting Timer 1 interrupt
+  85   1        EA = 1; 
+  86   1      
+  87   1      
+  88   1        // Program Logic follows
+  89   1        //printf("User A,Enter '1234567890' 5 times\n");
+  90   1        //printf("#%u Entry\n", trials_num);
+  91   1      
+  92   1        while (1) {
+  93   2          
+  94   2      
+  95   2          signed char x = _getkey();
+  96   2          
+  97   2          if((states_bit == 0) && (trials_num == 0)){
+  98   3            // Just got last entry by User A @(Training Session)
+  99   3            trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
+ 100   3            states_bit = 1;   // Set to User B (Training Session) 
+ 101   3          
+ 102   3          } else if((states_bit == 1) && (trials_num == 0) ) {
+ 103   3            // Just got last entry by User B @(Training Session)
+ 104   3            states_bit = 2; // Set to (Test Session)
+ 105   3            
+ 106   3          }
+ 107   2          
+ 108   2          
+ 109   2          if (x == test[key_i]) {
+ 110   3            // a Key was pressed Logic
+ 111   3            if ((key_i != 0) && (states_bit == 0)) {
+ 112   4              time_between_chars_typed_userA[key_i-1] += (T1_ISR_count / 5);
+ 113   4              //printf("%u\n", time_between_chars_typed_userA[key_i-1]);
+ 114   4            
+ 115   4            } else if((key_i != 0) && (states_bit == 1)) {
+ 116   4              time_between_chars_typed_userB[key_i-1] += (T1_ISR_count / 5);
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 22:54:08 PAGE 3   
+
+ 117   4              //printf("%u\n", time_between_chars_typed_userB[key_i-1]);  
+ 118   4              
+ 119   4            } else if( (key_i != 0) && (states_bit == 2)) {
+ 120   4              time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
+ 121   4              //printf("%u\n", time_between_chars_typed_recognize[key_i-1]);  
+ 122   4              
+ 123   4            }       
+ 124   3            key_i++;    
+ 125   3        
+ 126   3          } else { 
+ 127   3            printf("%c\n", test[key_i]);
+ 128   3            //key_i = 0;
+ 129   3            // TODO does the counter reset in this case?
+ 130   3          }
+ 131   2          
+ 132   2          T1_ISR_count = 0;
+ 133   2          
+ 134   2          
+ 135   2          if (key_i == 10) {
+ 136   3            // Sequence entered correctly Logic
+ 137   3            key_i = 0;
+ 138   3            
+ 139   3            if((states_bit == 0) || (states_bit == 1))
+ 140   3              // It is a (Training Session)
+ 141   3              trials_num --;
+ 142   3            
+ 143   3            if((states_bit == 0) && (trials_num == 0)){
+ 144   4              printf("%s\n" , msg1);
+ 145   4              
+ 146   4            } else if((states_bit == 1) && (trials_num == 0)){
+ 147   4              printf("%s\n", msg2);
+ 148   4          
+ 149   4            } else if(states_bit == 2) {
+ 150   4              // Detection Logic
+ 151   4                      
+ 152   4              unsigned char feature_i = 0;
+ 153   4              
+ 154   4              signed int error_diff = 0;
+ 155   4              
+ 156   4              unsigned long int sum_sq_err_A = 0;
+ 157   4              unsigned long int sum_sq_err_B = 0;
+ 158   4              
+ 159   4              
+ 160   4              for(; feature_i < 10; feature_i++) {
+ 161   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_
+             -i]);
+ 162   5                sum_sq_err_A += (error_diff*error_diff);
+ 163   5                
+ 164   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_
+             -i]);
+ 165   5                sum_sq_err_B += (error_diff*error_diff);
+ 166   5              }
+ 167   4              
+ 168   4              if(sum_sq_err_A > sum_sq_err_B) {
+ 169   5                printf("User B\n");
+ 170   5                flash_counter = 4;
+ 171   5              } else {
+ 172   5                printf("User A\n");
+ 173   5                flash_counter = 2;
+ 174   5              } 
+ 175   4              //printf("Oh! no I can not take a guess!");
+ 176   4              
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 22:54:08 PAGE 4   
+
+ 177   4            }
+ 178   3            
+ 179   3          }
+ 180   2        }
+ 181   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    548    ----
+   CONSTANT SIZE    =     24    ----
+   XDATA SIZE       =    112    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     20      72
+>>>>>>> d2ec912b40bab2559e0f1540fae5289f7d92a84b
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
