@@ -1,5 +1,8 @@
 #include <REG52.H>
 #include <stdio.h>
+sbit P1_1 = 0x91;  // Port 1.1 SFR bit
+unsigned char flash_counter = 0;
+
 
 /*------------------------------------------------
 The following string is the stuff we're gonna
@@ -12,6 +15,10 @@ Timer 1 Overflow Interrupt
 unsigned int T1_ISR_count = 0;
 void T1_ISR(void) interrupt 3 {	
 	T1_ISR_count++;
+	if(flash_counter > 0){
+		P1_1 = ~P1_1;
+		flash_counter--;
+	}		
 	TF1 = 0; // Reset the interrupt request
 }
 
@@ -42,6 +49,11 @@ void main (void) {
 	unsigned int time_between_chars_typed_userA[10];
 	unsigned int time_between_chars_typed_userB[10];
 	unsigned int time_between_chars_typed_recognize[10];
+	
+
+	P1_1 = ~P1_1;
+	flash_counter = 4;
+
 	
 	/*Note : timer takes 135 micro seconds to overflow*/
 	
@@ -101,14 +113,15 @@ void main (void) {
 				//printf("%u\n", time_between_chars_typed_recognize[key_i-1]);	
 				
 			}				
-			key_i++;
-			T1_ISR_count = 0;				
+			key_i++;		
 	
 		} else { 
-			printf("Repeat\n");
-			key_i = 0;
+			printf("%c\n", test[key_i]);
+			//key_i = 0;
 			// TODO does the counter reset in this case?
 		}
+		
+		T1_ISR_count = 0;
 		
 		
 		if (key_i == 10) {
@@ -145,9 +158,13 @@ void main (void) {
 				}
 				
 				if(sum_sq_err_A > sum_sq_err_B) {
-					printf("User B\n");
+					//printf("User B\n");
+					P1_1 = ~P1_1;
+					flash_counter = 2;
 				} else {
-					printf("User A\n");
+					//printf("User A\n");
+					P1_1 = ~P1_1;
+					flash_counter = 1;
 				} 
 				//printf("Oh! no I can not take a guess!");
 				

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 18:11:36 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 19:34:51 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -10,176 +10,195 @@ line level    source
 
    1          #include <REG52.H>
    2          #include <stdio.h>
-   3          
-   4          /*------------------------------------------------
-   5          The following string is the stuff we're gonna
-   6          send into the serial port.
-   7          ------------------------------------------------*/
-   8          
-   9          /*---------------------------------------------------------
-  10          Timer 1 Overflow Interrupt
-  11          ---------------------------------------------------------*/
-  12          unsigned int T1_ISR_count = 0;
-  13          void T1_ISR(void) interrupt 3 { 
-  14   1        T1_ISR_count++;
-  15   1        TF1 = 0; // Reset the interrupt request
-  16   1      }
-  17          
-  18          unsigned char key_i=0;
-  19          
-  20          // Testing by use of word ".tie5Ronal"
-  21          //char xdata key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
-  22          signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
-  23          
+   3          sbit P1_1 = 0x91;  // Port 1.1 SFR bit
+   4          unsigned char flash_counter = 0;
+   5          
+   6          
+   7          /*------------------------------------------------
+   8          The following string is the stuff we're gonna
+   9          send into the serial port.
+  10          ------------------------------------------------*/
+  11          
+  12          /*---------------------------------------------------------
+  13          Timer 1 Overflow Interrupt
+  14          ---------------------------------------------------------*/
+  15          unsigned int T1_ISR_count = 0;
+  16          void T1_ISR(void) interrupt 3 { 
+  17   1        T1_ISR_count++;
+  18   1        if(flash_counter > 0){
+  19   2          P1_1 = ~P1_1;
+  20   2          flash_counter--;
+  21   2        }   
+  22   1        TF1 = 0; // Reset the interrupt request
+  23   1      }
   24          
-  25          // Arrays to save time intervals between each user press
+  25          unsigned char key_i=0;
   26          
-  27          unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
-  28          unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
-  29          
-  30          unsigned char trials_num = 5; // # of entries needed to be entered by current user
+  27          // Testing by use of word ".tie5Ronal"
+  28          //char xdata key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
+  29          signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
+  30          
   31          
-  32          
-  33          // state_bit
-  34          // 0 :userA training phase
-  35          // 1 :means userB training phase
-  36          // 2 :means entering test phase  
-  37          unsigned char states_bit = 0;
-  38            
+  32          // Arrays to save time intervals between each user press
+  33          
+  34          unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
+  35          unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
+  36          
+  37          unsigned char trials_num = 5; // # of entries needed to be entered by current user
+  38          
   39          
-  40          
-  41          void main (void) {
-  42   1        unsigned int time_between_chars_typed_userA[10];
-  43   1        unsigned int time_between_chars_typed_userB[10];
-  44   1        unsigned int time_between_chars_typed_recognize[10];
-  45   1        
-  46   1        /*Note : timer takes 135 micro seconds to overflow*/
-  47   1        
-  48   1        
-  49   1        /*------------------------------------------------
-  50   1          Setup the timer 1 to start in mode 2 with auto reload value of 0.
-  51   1        ------------------------------------------------*/
-  52   1                  // Setting the global interrupt
-  53   1        SCON = 0x50;    // SCON:  mode 1, 8-bit UART, enable receiver
-  54   1        TMOD |= 0x20;   // TMOD:  timer 1, mode 2, 16-bit 
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 18:11:36 PAGE 2   
+  40          // state_bit
+  41          // 0 :userA training phase
+  42          // 1 :means userB training phase
+  43          // 2 :means entering test phase  
+  44          unsigned char states_bit = 0;
+  45            
+  46          
+  47          
+  48          void main (void) {
+  49   1        unsigned int time_between_chars_typed_userA[10];
+  50   1        unsigned int time_between_chars_typed_userB[10];
+  51   1        unsigned int time_between_chars_typed_recognize[10];
+  52   1        
+  53   1      
+  54   1        P1_1 = ~P1_1;
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 19:34:51 PAGE 2   
 
-  55   1        TH1 = 0x00;     // TH1:   Seting timer auto reload value to 0
-  56   1        TR1 = 1;        // TR1:   timer 1 run
-  57   1        TI = 1;         // TI:    set TI to send first char of UART
-  58   1        IT1 = 0;
-  59   1        //PCON |= 0x80;
+  55   1        flash_counter = 4;
+  56   1      
+  57   1        
+  58   1        /*Note : timer takes 135 micro seconds to overflow*/
+  59   1        
   60   1        
-  61   1        /*--------------------------------------
-  62   1          Enable interrupts for timer 1.
-  63   1        --------------------------------------*/
-  64   1        ET1 = 1;        // Setting Timer 1 interrupt
-  65   1        EA = 1; 
-  66   1      
-  67   1      
-  68   1        // Program Logic follows
-  69   1        printf("User A,Enter '1234567890' 5 times\n");
-  70   1        //printf("#%u Entry\n", trials_num);
-  71   1      
-  72   1        while (1) {
-  73   2          
-  74   2      
-  75   2          signed char x = _getkey();
-  76   2          
-  77   2          if(states_bit == 0 && trials_num == 0){
-  78   3            // Just got last entry by User A @(Training Session)
-  79   3            trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
-  80   3            states_bit = 1;   // Set to User B (Training Session) 
-  81   3          
-  82   3          } else if(states_bit == 1 && trials_num == 0 ) {
-  83   3            // Just got last entry by User B @(Training Session)
-  84   3            states_bit = 2; // Set to (Test Session)
-  85   3            
-  86   3          }
-  87   2          
+  61   1        /*------------------------------------------------
+  62   1          Setup the timer 1 to start in mode 2 with auto reload value of 0.
+  63   1        ------------------------------------------------*/
+  64   1                  // Setting the global interrupt
+  65   1        SCON = 0x50;    // SCON:  mode 1, 8-bit UART, enable receiver
+  66   1        TMOD |= 0x20;   // TMOD:  timer 1, mode 2, 16-bit 
+  67   1        TH1 = 0x00;     // TH1:   Seting timer auto reload value to 0
+  68   1        TR1 = 1;        // TR1:   timer 1 run
+  69   1        TI = 1;         // TI:    set TI to send first char of UART
+  70   1        IT1 = 0;
+  71   1        //PCON |= 0x80;
+  72   1        
+  73   1        /*--------------------------------------
+  74   1          Enable interrupts for timer 1.
+  75   1        --------------------------------------*/
+  76   1        ET1 = 1;        // Setting Timer 1 interrupt
+  77   1        EA = 1; 
+  78   1      
+  79   1      
+  80   1        // Program Logic follows
+  81   1        printf("User A,Enter '1234567890' 5 times\n");
+  82   1        //printf("#%u Entry\n", trials_num);
+  83   1      
+  84   1        while (1) {
+  85   2          
+  86   2      
+  87   2          signed char x = _getkey();
   88   2          
-  89   2          if (x == test[key_i]) {
-  90   3            // a Key was pressed Logic
-  91   3            if (key_i != 0 && states_bit == 0) {
-  92   4              time_between_chars_typed_userA[key_i-1] += (T1_ISR_count / 5);
-  93   4              //printf("%u\n", time_between_chars_typed_userA[key_i-1]);
-  94   4            
-  95   4            } else if(key_i != 0 && states_bit == 1) {
-  96   4              time_between_chars_typed_userB[key_i-1] += (T1_ISR_count / 5);
-  97   4              //printf("%u\n", time_between_chars_typed_userB[key_i-1]);  
-  98   4              
-  99   4            } else if( key_i != 0 && states_bit == 2) {
- 100   4              time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
- 101   4              //printf("%u\n", time_between_chars_typed_recognize[key_i-1]);  
- 102   4              
- 103   4            }       
- 104   3            key_i++;
- 105   3            T1_ISR_count = 0;       
- 106   3        
- 107   3          } else { 
- 108   3            printf("Repeat\n");
- 109   3            key_i = 0;
- 110   3            // TODO does the counter reset in this case?
- 111   3          }
- 112   2          
- 113   2          
- 114   2          if (key_i == 10) {
- 115   3            // Sequence entered correctly Logic
- 116   3            key_i = 0;
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 18:11:36 PAGE 3   
+  89   2          if(states_bit == 0 && trials_num == 0){
+  90   3            // Just got last entry by User A @(Training Session)
+  91   3            trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
+  92   3            states_bit = 1;   // Set to User B (Training Session) 
+  93   3          
+  94   3          } else if(states_bit == 1 && trials_num == 0 ) {
+  95   3            // Just got last entry by User B @(Training Session)
+  96   3            states_bit = 2; // Set to (Test Session)
+  97   3            
+  98   3          }
+  99   2          
+ 100   2          
+ 101   2          if (x == test[key_i]) {
+ 102   3            // a Key was pressed Logic
+ 103   3            if (key_i != 0 && states_bit == 0) {
+ 104   4              time_between_chars_typed_userA[key_i-1] += (T1_ISR_count / 5);
+ 105   4              //printf("%u\n", time_between_chars_typed_userA[key_i-1]);
+ 106   4            
+ 107   4            } else if(key_i != 0 && states_bit == 1) {
+ 108   4              time_between_chars_typed_userB[key_i-1] += (T1_ISR_count / 5);
+ 109   4              //printf("%u\n", time_between_chars_typed_userB[key_i-1]);  
+ 110   4              
+ 111   4            } else if( key_i != 0 && states_bit == 2) {
+ 112   4              time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
+ 113   4              //printf("%u\n", time_between_chars_typed_recognize[key_i-1]);  
+ 114   4              
+ 115   4            }       
+ 116   3            key_i++;    
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 19:34:51 PAGE 3   
 
- 117   3            
- 118   3            if(states_bit == 0 || states_bit == 1)
- 119   3              // It is a (Training Session)
- 120   3              trials_num --;
- 121   3            
- 122   3            if(states_bit == 0 && trials_num == 0){
- 123   4              printf("%s\n" , msg1);
- 124   4              
- 125   4            } else if(states_bit == 1 && trials_num == 0){
- 126   4              printf("%s\n", msg2);
- 127   4          
- 128   4            } else if(states_bit == 2) {
- 129   4              // Detection Logic
- 130   4                      
- 131   4              unsigned char feature_i = 0;
- 132   4              
- 133   4              signed int error_diff = 0;
- 134   4              
- 135   4              unsigned long int sum_sq_err_A = 0;
- 136   4              unsigned long int sum_sq_err_B = 0;
+ 117   3        
+ 118   3          } else { 
+ 119   3            printf("%c\n", test[key_i]);
+ 120   3            //key_i = 0;
+ 121   3            // TODO does the counter reset in this case?
+ 122   3          }
+ 123   2          
+ 124   2          T1_ISR_count = 0;
+ 125   2          
+ 126   2          
+ 127   2          if (key_i == 10) {
+ 128   3            // Sequence entered correctly Logic
+ 129   3            key_i = 0;
+ 130   3            
+ 131   3            if(states_bit == 0 || states_bit == 1)
+ 132   3              // It is a (Training Session)
+ 133   3              trials_num --;
+ 134   3            
+ 135   3            if(states_bit == 0 && trials_num == 0){
+ 136   4              printf("%s\n" , msg1);
  137   4              
- 138   4              
- 139   4              for(; feature_i < 10; feature_i++) {
- 140   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_
+ 138   4            } else if(states_bit == 1 && trials_num == 0){
+ 139   4              printf("%s\n", msg2);
+ 140   4          
+ 141   4            } else if(states_bit == 2) {
+ 142   4              // Detection Logic
+ 143   4                      
+ 144   4              unsigned char feature_i = 0;
+ 145   4              
+ 146   4              signed int error_diff = 0;
+ 147   4              
+ 148   4              unsigned long int sum_sq_err_A = 0;
+ 149   4              unsigned long int sum_sq_err_B = 0;
+ 150   4              
+ 151   4              
+ 152   4              for(; feature_i < 10; feature_i++) {
+ 153   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_
              -i]);
- 141   5                sum_sq_err_A += (error_diff*error_diff);
- 142   5                
- 143   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_
+ 154   5                sum_sq_err_A += (error_diff*error_diff);
+ 155   5                
+ 156   5                error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userB[feature_
              -i]);
- 144   5                sum_sq_err_B += (error_diff*error_diff);
- 145   5              }
- 146   4              
- 147   4              if(sum_sq_err_A > sum_sq_err_B) {
- 148   5                printf("User B\n");
- 149   5              } else {
- 150   5                printf("User A\n");
- 151   5              } 
- 152   4              //printf("Oh! no I can not take a guess!");
- 153   4              
- 154   4            }
- 155   3            
- 156   3          }
- 157   2        }
- 158   1      }
+ 157   5                sum_sq_err_B += (error_diff*error_diff);
+ 158   5              }
+ 159   4              
+ 160   4              if(sum_sq_err_A > sum_sq_err_B) {
+ 161   5                //printf("User B\n");
+ 162   5                P1_1 = ~P1_1;
+ 163   5                flash_counter = 2;
+ 164   5              } else {
+ 165   5                //printf("User A\n");
+ 166   5                P1_1 = ~P1_1;
+ 167   5                flash_counter = 1;
+ 168   5              } 
+ 169   4              //printf("Oh! no I can not take a guess!");
+ 170   4              
+ 171   4            }
+ 172   3            
+ 173   3          }
+ 174   2        }
+ 175   1      }
+
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 19:34:51 PAGE 4   
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    495    ----
-   CONSTANT SIZE    =     63    ----
+   CODE SIZE        =    518    ----
+   CONSTANT SIZE    =     43    ----
    XDATA SIZE       =    112    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     16      72
+   DATA SIZE        =     17      72
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
