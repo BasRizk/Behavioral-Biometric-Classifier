@@ -3,6 +3,7 @@
 sbit P1_1 = 0x91;  // Port 1.1 SFR bit
 unsigned char flash_counter = 4;
 unsigned int flash_timer = 0;
+unsigned char splitter = 0;
 
 /*------------------------------------------------
 The following string is the stuff we're gonna
@@ -13,8 +14,13 @@ send into the serial port.
 Timer 1 Overflow Interrupt
 ---------------------------------------------------------*/
 unsigned int T1_ISR_count = 0;
-void T1_ISR(void) interrupt 3 {	
-	T1_ISR_count++;
+void T1_ISR(void) interrupt 3 {
+
+	if(splitter == 14) {
+		T1_ISR_count++;
+		splitter = 0;
+	}
+	splitter++;
 	if((flash_timer >= 5000) && (flash_counter > 0)){
 			P1_1 = ~P1_1;
 			flash_counter--;
