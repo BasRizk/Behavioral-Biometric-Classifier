@@ -1,6 +1,6 @@
 #include <REG52.H>
 #include <stdio.h>
-#include <string.h>
+
 /*------------------------------------------------
 The following string is the stuff we're gonna
 send into the serial port.
@@ -19,29 +19,29 @@ unsigned char key_i=0;
 
 // Testing by use of word ".tie5Ronal"
 //char xdata key[11] = {'.', 't', 'i', 'e', '5', 'R', 'o', 'n', 'a', 'l', '\0'};
-char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
+signed char test[11] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
+
 
 // Arrays to save time intervals between each user press
-
 
 unsigned char xdata msg1 [] = "User A training end\nNow User B, Enter '1234567890' 5 times\n";
 unsigned char xdata msg2 [] = "User B training end\nNow any user enters 1234567890\n";
 
 unsigned char trials_num = 5;	// # of entries needed to be entered by current user
 
+
 // state_bit
 // 0 :userA training phase
 // 1 :means userB training phase
 // 2 :means entering test phase  
 unsigned char states_bit = 0;
-
-
-
 	
+
+
 void main (void) {
-	int time_between_chars_typed_userA[10];
-	int time_between_chars_typed_userB[10];
-	int time_between_chars_typed_recognize[10];
+	unsigned int time_between_chars_typed_userA[10];
+	unsigned int time_between_chars_typed_userB[10];
+	unsigned int time_between_chars_typed_recognize[10];
 	
 	/*Note : timer takes 135 micro seconds to overflow*/
 	
@@ -72,7 +72,7 @@ void main (void) {
 	while (1) {
 		
 
-		char x = _getkey();
+		signed char x = _getkey();
 		
 		if(states_bit == 0 && trials_num == 0){
 			// Just got last entry by User A @(Training Session)
@@ -127,12 +127,14 @@ void main (void) {
 		
 			} else if(states_bit == 2) {
 				// Detection Logic
+								
 				unsigned char feature_i = 0;
 				
-				int error_diff = 0;
-				long sum_sq_err_A = 0;
+				signed int error_diff = 0;
 				
-				long sum_sq_err_B = 0;
+				unsigned long int sum_sq_err_A = 0;
+				unsigned long int sum_sq_err_B = 0;
+				
 				
 				for(; feature_i < 10; feature_i++) {
 					error_diff = (time_between_chars_typed_recognize[feature_i] - time_between_chars_typed_userA[feature_i]);
