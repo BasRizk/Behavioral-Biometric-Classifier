@@ -103,7 +103,10 @@ void main (void) {
 //		}	
 		
 		if(states_interupt != 0xFF){
-				printf("%s %u\n" , msg[states_interupt],(unsigned int) trials[states_interupt]);
+				if(states_bit & 0x2)
+					printf("%s\n" , msg[states_interupt]);
+				else
+					printf("%s %u\n" , msg[states_interupt],(unsigned int) trials[states_interupt]);
 				states_interupt = 0xFF;
 		}
 		

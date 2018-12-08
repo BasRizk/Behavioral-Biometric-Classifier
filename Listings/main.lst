@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:35:49 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:50:18 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   52          // 2 :Test Phase 
   53          unsigned char states_bit = 0;
   54          unsigned char states_interupt = 0;
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:35:49 PAGE 2   
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:50:18 PAGE 2   
 
   55            
   56          
@@ -115,101 +115,104 @@ line level    source
  103   2      //    } 
  104   2          
  105   2          if(states_interupt != 0xFF){
- 106   3              printf("%s %u\n" , msg[states_interupt],(unsigned int) trials[states_interupt]);
- 107   3              states_interupt = 0xFF;
- 108   3          }
- 109   2          
- 110   2          x = _getkey();
- 111   2            
+ 106   3              if(states_bit & 0x2)
+ 107   3                printf("%s\n" , msg[states_interupt]);
+ 108   3              else
+ 109   3                printf("%s %u\n" , msg[states_interupt],(unsigned int) trials[states_interupt]);
+ 110   3              states_interupt = 0xFF;
+ 111   3          }
  112   2          
- 113   2          if (x == test[key_i]) {
- 114   3            // a Key was pressed Logic
- 115   3            if ((key_i != 0) && (states_bit == 0)) {
- 116   4              time_between_chars_typed_userA[key_i-1] += (T1_ISR_count);
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:35:49 PAGE 3   
+ 113   2          x = _getkey();
+ 114   2            
+ 115   2          
+ 116   2          if (x == test[key_i]) {
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:50:18 PAGE 3   
 
- 117   4              //printf("%u\n", time_between_chars_typed_userA[key_i-1]);
- 118   4            
- 119   4            } else if((key_i != 0) && (states_bit == 1)) {
- 120   4              time_between_chars_typed_userB[key_i-1] += (T1_ISR_count);
- 121   4              //printf("%u\n", time_between_chars_typed_userB[key_i-1]);  
- 122   4              
- 123   4            } else if( (key_i != 0) && (states_bit == 2)) {
- 124   4              time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
- 125   4              //printf("%u\n", time_between_chars_typed_recognize[key_i-1]);  
- 126   4              
- 127   4            }       
- 128   3            key_i++;    
- 129   3        
- 130   3          } else if(x == ','){ // Toggle Modes
- 131   3            states_bit = (states_bit ^ 0x02) & 0xFE;
- 132   3            states_interupt = states_bit;
- 133   3          } else if( (x == '.') && (~(states_bit & 0x02))){ // Toggle Users in training Mode
- 134   3            states_bit = (states_bit ^ 0x01);
+ 117   3            // a Key was pressed Logic
+ 118   3            if ((key_i != 0) && (states_bit == 0)) {
+ 119   4              time_between_chars_typed_userA[key_i-1] += (T1_ISR_count);
+ 120   4              //printf("%u\n", time_between_chars_typed_userA[key_i-1]);
+ 121   4            
+ 122   4            } else if((key_i != 0) && (states_bit == 1)) {
+ 123   4              time_between_chars_typed_userB[key_i-1] += (T1_ISR_count);
+ 124   4              //printf("%u\n", time_between_chars_typed_userB[key_i-1]);  
+ 125   4              
+ 126   4            } else if( (key_i != 0) && (states_bit == 2)) {
+ 127   4              time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
+ 128   4              //printf("%u\n", time_between_chars_typed_recognize[key_i-1]);  
+ 129   4              
+ 130   4            }       
+ 131   3            key_i++;    
+ 132   3        
+ 133   3          } else if(x == ','){ // Toggle Modes
+ 134   3            states_bit = (states_bit ^ 0x02) & 0xFE;
  135   3            states_interupt = states_bit;
- 136   3          } else { 
- 137   3            printf("%c\n", test[key_i]);
- 138   3            //key_i = 0;
- 139   3            // TODO does the counter reset in this case?
- 140   3          }
- 141   2          
- 142   2          T1_ISR_count = 0;
- 143   2              
- 144   2          if (key_i == 10) {
- 145   3            // Sequence entered correctly Logic
- 146   3            key_i = 0;
- 147   3            
- 148   3            if((states_bit == 0) || (states_bit == 1)){
- 149   4              
- 150   4              // It is a (Training Session)
- 151   4              trials[states_bit]++;
- 152   4              states_interupt = states_bit;
- 153   4            }
- 154   3            
- 155   3            
- 156   3      
- 157   3            if(states_bit == 2) {
- 158   4              // Detection Logic
- 159   4                      
- 160   4              unsigned char feature_i = 0;
- 161   4              
- 162   4              signed int error_diff = 0;
- 163   4              
- 164   4              unsigned long int sum_sq_err_A = 0;
- 165   4              unsigned long int sum_sq_err_B = 0;
+ 136   3          } else if( (x == '.') && (~(states_bit & 0x02))){ // Toggle Users in training Mode
+ 137   3            states_bit = (states_bit ^ 0x01);
+ 138   3            states_interupt = states_bit;
+ 139   3          } else { 
+ 140   3            printf("%c\n", test[key_i]);
+ 141   3            //key_i = 0;
+ 142   3            // TODO does the counter reset in this case?
+ 143   3          }
+ 144   2          
+ 145   2          T1_ISR_count = 0;
+ 146   2              
+ 147   2          if (key_i == 10) {
+ 148   3            // Sequence entered correctly Logic
+ 149   3            key_i = 0;
+ 150   3            
+ 151   3            if((states_bit == 0) || (states_bit == 1)){
+ 152   4              
+ 153   4              // It is a (Training Session)
+ 154   4              trials[states_bit]++;
+ 155   4              states_interupt = states_bit;
+ 156   4            }
+ 157   3            
+ 158   3            
+ 159   3      
+ 160   3            if(states_bit == 2) {
+ 161   4              // Detection Logic
+ 162   4                      
+ 163   4              unsigned char feature_i = 0;
+ 164   4              
+ 165   4              signed int error_diff = 0;
  166   4              
- 167   4              
- 168   4              for(; feature_i < 10; feature_i++) {
- 169   5                error_diff = (time_between_chars_typed_recognize[feature_i] - (time_between_chars_typed_userA[feature
+ 167   4              unsigned long int sum_sq_err_A = 0;
+ 168   4              unsigned long int sum_sq_err_B = 0;
+ 169   4              
+ 170   4              
+ 171   4              for(; feature_i < 10; feature_i++) {
+ 172   5                error_diff = (time_between_chars_typed_recognize[feature_i] - (time_between_chars_typed_userA[feature
              -_i] / trials[0]));
- 170   5                sum_sq_err_A += (error_diff*error_diff);
- 171   5                
- 172   5                error_diff = (time_between_chars_typed_recognize[feature_i] - (time_between_chars_typed_userB[feature
+ 173   5                sum_sq_err_A += (error_diff*error_diff);
+ 174   5                
+ 175   5                error_diff = (time_between_chars_typed_recognize[feature_i] - (time_between_chars_typed_userB[feature
              -_i] / trials[1]));
- 173   5                sum_sq_err_B += (error_diff*error_diff);
- 174   5              }
- 175   4              
- 176   4              if(sum_sq_err_A > sum_sq_err_B) {
-C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:35:49 PAGE 4   
+ 176   5                sum_sq_err_B += (error_diff*error_diff);
+C51 COMPILER V9.59.0.0   MAIN                                                              12/08/2018 23:50:18 PAGE 4   
 
- 177   5                printf("User B\n");
- 178   5                flash_counter = 4;
- 179   5              } else {
- 180   5                printf("User A\n");
- 181   5                flash_counter = 2;
- 182   5              } 
- 183   4              //printf("Oh! no I can not take a guess!");
- 184   4              
- 185   4            }
- 186   3            
- 187   3          }
- 188   2        }
- 189   1      }
+ 177   5              }
+ 178   4              
+ 179   4              if(sum_sq_err_A > sum_sq_err_B) {
+ 180   5                printf("User B\n");
+ 181   5                flash_counter = 4;
+ 182   5              } else {
+ 183   5                printf("User A\n");
+ 184   5                flash_counter = 2;
+ 185   5              } 
+ 186   4              //printf("Oh! no I can not take a guess!");
+ 187   4              
+ 188   4            }
+ 189   3            
+ 190   3          }
+ 191   2        }
+ 192   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    554    ----
-   CONSTANT SIZE    =     27    ----
+   CODE SIZE        =    587    ----
+   CONSTANT SIZE    =     31    ----
    XDATA SIZE       =     60    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =     23      72

@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    12/08/2018  23:35:49  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    12/08/2018  23:50:18  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
@@ -50,16 +50,16 @@ LINK MAP OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
             CODE    001BH     0003H     ABSOLUTE     
                     001EH     07E2H                  *** GAP ***
             CODE    0800H     035CH     UNIT         ?PR?PRINTF?PRINTF
-            CODE    0B5CH     01E4H     UNIT         ?PR?MAIN?MAIN
-            CODE    0D40H     0106H     UNIT         ?C?LIB_CODE
-            CODE    0E46H     008CH     UNIT         ?C_C51STARTUP
-            CODE    0ED2H     006AH     UNIT         ?C_INITSEG
-            CODE    0F3CH     0046H     UNIT         ?PR?T1_ISR?MAIN
-            CODE    0F82H     0027H     UNIT         ?PR?PUTCHAR?PUTCHAR
-            CODE    0FA9H     001BH     UNIT         ?CO?MAIN
-            CODE    0FC4H     000AH     UNIT         ?PR?_GETKEY?_GETKEY
+            CODE    0B5CH     0205H     UNIT         ?PR?MAIN?MAIN
+            CODE    0D61H     0106H     UNIT         ?C?LIB_CODE
+            CODE    0E67H     008CH     UNIT         ?C_C51STARTUP
+            CODE    0EF3H     006AH     UNIT         ?C_INITSEG
+            CODE    0F5DH     0046H     UNIT         ?PR?T1_ISR?MAIN
+            CODE    0FA3H     0027H     UNIT         ?PR?PUTCHAR?PUTCHAR
+            CODE    0FCAH     001FH     UNIT         ?CO?MAIN
+            CODE    0FE9H     000AH     UNIT         ?PR?_GETKEY?_GETKEY
 
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:35:49  PAGE 2
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:50:18  PAGE 2
 
 
 
@@ -90,7 +90,7 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   ----------------------------------
 
   -------         MODULE        ?C_STARTUP
-  C:0E46H         SEGMENT       ?C_C51STARTUP
+  C:0E67H         SEGMENT       ?C_C51STARTUP
   I:007EH         SEGMENT       ?STACK
   C:0000H         PUBLIC        ?C_STARTUP
   D:00E0H         SYMBOL        ACC
@@ -100,7 +100,7 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   N:0000H         SYMBOL        IBPSTACK
   N:0100H         SYMBOL        IBPSTACKTOP
   N:0080H         SYMBOL        IDATALEN
-  C:0E49H         SYMBOL        IDATALOOP
+  C:0E6AH         SYMBOL        IDATALOOP
   N:0000H         SYMBOL        PBPSTACK
   N:0100H         SYMBOL        PBPSTACKTOP
   N:0000H         SYMBOL        PDATALEN
@@ -109,21 +109,21 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   N:0000H         SYMBOL        PPAGEENABLE
   D:00A0H         SYMBOL        PPAGE_SFR
   D:0081H         SYMBOL        SP
-  C:0E46H         SYMBOL        STARTUP1
+  C:0E67H         SYMBOL        STARTUP1
   N:0000H         SYMBOL        XBPSTACK
   N:0000H         SYMBOL        XBPSTACKTOP
   N:0000H         SYMBOL        XDATALEN
   N:0000H         SYMBOL        XDATASTART
   C:0000H         LINE#         126
-  C:0E46H         LINE#         133
-  C:0E48H         LINE#         134
-  C:0E49H         LINE#         135
-  C:0E4AH         LINE#         136
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:35:49  PAGE 3
+  C:0E67H         LINE#         133
+  C:0E69H         LINE#         134
+  C:0E6AH         LINE#         135
+  C:0E6BH         LINE#         136
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:50:18  PAGE 3
 
 
-  C:0E4CH         LINE#         185
-  C:0E4FH         LINE#         196
+  C:0E6DH         LINE#         185
+  C:0E70H         LINE#         196
   -------         ENDMOD        ?C_STARTUP
 
   -------         MODULE        MAIN
@@ -149,7 +149,7 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   B:0088H.7       PUBLIC        TF1
   D:008DH         PUBLIC        TH1
   B:0088H.2       PUBLIC        IT1
-  C:0F3CH         PUBLIC        T1_ISR
+  C:0F5DH         PUBLIC        T1_ISR
   B:0088H.6       PUBLIC        TR1
   D:001AH         PUBLIC        T1_ISR_count
   D:00C8H         PUBLIC        T2CON
@@ -158,20 +158,20 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   D:00D0H         PUBLIC        PSW
   D:001EH         PUBLIC        splitter
   -------         PROC          T1_ISR
-  C:0F3CH         LINE#         17
-  C:0F40H         LINE#         19
-  C:0F46H         LINE#         20
-  C:0F4EH         LINE#         21
-  C:0F51H         LINE#         22
-  C:0F51H         LINE#         23
-  C:0F53H         LINE#         24
-  C:0F69H         LINE#         25
-  C:0F6BH         LINE#         26
-  C:0F6DH         LINE#         27
-  C:0F73H         LINE#         28
-  C:0F73H         LINE#         29
-  C:0F7BH         LINE#         30
-  C:0F7DH         LINE#         31
+  C:0F5DH         LINE#         17
+  C:0F61H         LINE#         19
+  C:0F67H         LINE#         20
+  C:0F6FH         LINE#         21
+  C:0F72H         LINE#         22
+  C:0F72H         LINE#         23
+  C:0F74H         LINE#         24
+  C:0F8AH         LINE#         25
+  C:0F8CH         LINE#         26
+  C:0F8EH         LINE#         27
+  C:0F94H         LINE#         28
+  C:0F94H         LINE#         29
+  C:0F9CH         LINE#         30
+  C:0F9EH         LINE#         31
   -------         ENDPROC       T1_ISR
   -------         PROC          MAIN
   -------         DO            
@@ -179,7 +179,7 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   D:0036H         SYMBOL        time_between_chars_typed_userB
   D:004AH         SYMBOL        time_between_chars_typed_recognize
   -------         DO            
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:35:49  PAGE 4
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:50:18  PAGE 4
 
 
   D:005EH         SYMBOL        x
@@ -203,71 +203,73 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   C:0B6FH         LINE#         95
   C:0B6FH         LINE#         105
   C:0B74H         LINE#         106
-  C:0B9CH         LINE#         107
-  C:0B9FH         LINE#         108
-  C:0B9FH         LINE#         110
-  C:0BA4H         LINE#         113
-  C:0BAEH         LINE#         115
-  C:0BB8H         LINE#         116
-  C:0BBEH         LINE#         119
-  C:0BCAH         LINE#         120
-  C:0BDBH         LINE#         123
-  C:0BE7H         LINE#         124
-  C:0BF3H         LINE#         127
-  C:0BF3H         LINE#         128
-  C:0BF5H         LINE#         130
-  C:0BFCH         LINE#         131
-  C:0C04H         LINE#         132
-  C:0C06H         LINE#         133
-  C:0C14H         LINE#         134
-  C:0C17H         LINE#         135
-  C:0C1AH         LINE#         136
-  C:0C1CH         LINE#         137
-  C:0C2DH         LINE#         140
-  C:0C2DH         LINE#         142
-  C:0C32H         LINE#         144
-  C:0C3BH         LINE#         146
-  C:0C3DH         LINE#         148
-  C:0C46H         LINE#         151
-  C:0C4CH         LINE#         152
-  C:0C4FH         LINE#         153
-  C:0C4FH         LINE#         157
-  C:0C58H         LINE#         160
-  C:0C5AH         LINE#         162
-  C:0C5EH         LINE#         164
-  C:0C66H         LINE#         165
-  C:0C6EH         LINE#         168
-  C:0C7CH         LINE#         169
-  C:0CA4H         LINE#         170
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:35:49  PAGE 5
+  C:0B79H         LINE#         107
+  C:0B95H         LINE#         109
+  C:0BBDH         LINE#         110
+  C:0BC0H         LINE#         111
+  C:0BC0H         LINE#         113
+  C:0BC5H         LINE#         116
+  C:0BCFH         LINE#         118
+  C:0BD9H         LINE#         119
+  C:0BDFH         LINE#         122
+  C:0BEBH         LINE#         123
+  C:0BFCH         LINE#         126
+  C:0C08H         LINE#         127
+  C:0C14H         LINE#         130
+  C:0C14H         LINE#         131
+  C:0C16H         LINE#         133
+  C:0C1DH         LINE#         134
+  C:0C25H         LINE#         135
+  C:0C27H         LINE#         136
+  C:0C35H         LINE#         137
+  C:0C38H         LINE#         138
+  C:0C3BH         LINE#         139
+  C:0C3DH         LINE#         140
+  C:0C4EH         LINE#         143
+  C:0C4EH         LINE#         145
+  C:0C53H         LINE#         147
+  C:0C5CH         LINE#         149
+  C:0C5EH         LINE#         151
+  C:0C67H         LINE#         154
+  C:0C6DH         LINE#         155
+  C:0C70H         LINE#         156
+  C:0C70H         LINE#         160
+  C:0C79H         LINE#         163
+  C:0C7BH         LINE#         165
+  C:0C7FH         LINE#         167
+  C:0C87H         LINE#         168
+  C:0C8FH         LINE#         171
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:50:18  PAGE 5
 
 
-  C:0CC7H         LINE#         172
-  C:0CE4H         LINE#         173
-  C:0D07H         LINE#         174
-  C:0D0CH         LINE#         176
-  C:0D22H         LINE#         177
-  C:0D2BH         LINE#         178
-  C:0D2EH         LINE#         179
-  C:0D31H         LINE#         180
-  C:0D3AH         LINE#         181
-  C:0D3DH         LINE#         182
-  C:0D3DH         LINE#         185
-  C:0D3DH         LINE#         187
-  C:0D3DH         LINE#         188
+  C:0C9DH         LINE#         172
+  C:0CC5H         LINE#         173
+  C:0CE8H         LINE#         175
+  C:0D05H         LINE#         176
+  C:0D28H         LINE#         177
+  C:0D2DH         LINE#         179
+  C:0D43H         LINE#         180
+  C:0D4CH         LINE#         181
+  C:0D4FH         LINE#         182
+  C:0D52H         LINE#         183
+  C:0D5BH         LINE#         184
+  C:0D5EH         LINE#         185
+  C:0D5EH         LINE#         188
+  C:0D5EH         LINE#         190
+  C:0D5EH         LINE#         191
   -------         ENDPROC       MAIN
   -------         ENDMOD        MAIN
 
   -------         MODULE        ?C?IMUL
-  C:0D40H         PUBLIC        ?C?IMUL
+  C:0D61H         PUBLIC        ?C?IMUL
   -------         ENDMOD        ?C?IMUL
 
   -------         MODULE        ?C?UIDIV
-  C:0D52H         PUBLIC        ?C?UIDIV
+  C:0D73H         PUBLIC        ?C?UIDIV
   -------         ENDMOD        ?C?UIDIV
 
   -------         MODULE        ?C?ULCMP
-  C:0DA7H         PUBLIC        ?C?ULCMP
+  C:0DC8H         PUBLIC        ?C?ULCMP
   -------         ENDMOD        ?C?ULCMP
 
   -------         MODULE        PRINTF
@@ -282,39 +284,39 @@ SYMBOL TABLE OF MODULE:  .\Objects\Biometric_Classifier (?C_STARTUP)
   -------         ENDMOD        PRINTF
 
   -------         MODULE        _GETKEY
-  C:0FC4H         PUBLIC        _GETKEY
+  C:0FE9H         PUBLIC        _GETKEY
   -------         ENDMOD        _GETKEY
 
   -------         MODULE        ?C?CLDPTR
-  C:0DB8H         PUBLIC        ?C?CLDPTR
+  C:0DD9H         PUBLIC        ?C?CLDPTR
   -------         ENDMOD        ?C?CLDPTR
 
   -------         MODULE        ?C?CLDOPTR
-  C:0DD1H         PUBLIC        ?C?CLDOPTR
+  C:0DF2H         PUBLIC        ?C?CLDOPTR
   -------         ENDMOD        ?C?CLDOPTR
 
   -------         MODULE        ?C?CSTPTR
-  C:0DFEH         PUBLIC        ?C?CSTPTR
+  C:0E1FH         PUBLIC        ?C?CSTPTR
   -------         ENDMOD        ?C?CSTPTR
 
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:50:18  PAGE 6
+
+
   -------         MODULE        ?C?PLDIIDATA
-  C:0E10H         PUBLIC        ?C?PLDIIDATA
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/08/2018  23:35:49  PAGE 6
-
-
+  C:0E31H         PUBLIC        ?C?PLDIIDATA
   -------         ENDMOD        ?C?PLDIIDATA
 
   -------         MODULE        ?C?CCASE
-  C:0E20H         PUBLIC        ?C?CCASE
+  C:0E41H         PUBLIC        ?C?CCASE
   -------         ENDMOD        ?C?CCASE
 
   -------         MODULE        PUTCHAR
-  C:0F82H         PUBLIC        _PUTCHAR
+  C:0FA3H         PUBLIC        _PUTCHAR
   -------         ENDMOD        PUTCHAR
 
 ******************************************************************************
-* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 02C0H BYTE (34%) *
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 02E5H BYTE (36%) *
 ******************************************************************************
 
-Program Size: data=125.1 xdata=60 code=2004
+Program Size: data=125.1 xdata=60 code=2041
 LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
