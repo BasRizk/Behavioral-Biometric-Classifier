@@ -1,8 +1,8 @@
 #include <REG52.H>
 #include <stdio.h>
 sbit P1_1 = 0x91;  // Port 1.1 SFR bit
-unsigned char flash_counter = 0;
-
+unsigned char flash_counter = 4;
+unsigned int flash_timer = 0;
 
 /*------------------------------------------------
 The following string is the stuff we're gonna
@@ -15,10 +15,12 @@ Timer 1 Overflow Interrupt
 unsigned int T1_ISR_count = 0;
 void T1_ISR(void) interrupt 3 {	
 	T1_ISR_count++;
-	if(flash_counter > 0){
-		P1_1 = ~P1_1;
-		flash_counter--;
+	if((flash_timer >= 5000) && (flash_counter > 0)){
+			P1_1 = ~P1_1;
+			flash_counter--;
+			flash_timer = 0;
 	}		
+	flash_timer++;
 	TF1 = 0; // Reset the interrupt request
 }
 
@@ -51,8 +53,8 @@ void main (void) {
 	unsigned int time_between_chars_typed_recognize[10];
 	
 
-	P1_1 = ~P1_1;
-	flash_counter = 4;
+	//P1_1 = ~P1_1;
+	//flash_counter = 4;
 
 	
 	/*Note : timer takes 135 micro seconds to overflow*/
@@ -78,7 +80,7 @@ void main (void) {
 
 
 	// Program Logic follows
-	printf("User A,Enter '1234567890' 5 times\n");
+	//printf("User A,Enter '1234567890' 5 times\n");
 	//printf("#%u Entry\n", trials_num);
 
 	while (1) {
@@ -86,12 +88,12 @@ void main (void) {
 
 		signed char x = _getkey();
 		
-		if(states_bit == 0 && trials_num == 0){
+		if((states_bit == 0) && (trials_num == 0)){
 			// Just got last entry by User A @(Training Session)
 			trials_num = 5;   // Reset # of needed entries for (Training Session) by User B
 			states_bit = 1;		// Set to User B (Training Session) 
 		
-		} else if(states_bit == 1 && trials_num == 0 ) {
+		} else if((states_bit == 1) && (trials_num == 0) ) {
 			// Just got last entry by User B @(Training Session)
 			states_bit = 2; // Set to (Test Session)
 			
@@ -100,15 +102,15 @@ void main (void) {
 		
 		if (x == test[key_i]) {
 			// a Key was pressed Logic
-			if (key_i != 0 && states_bit == 0) {
+			if ((key_i != 0) && (states_bit == 0)) {
 				time_between_chars_typed_userA[key_i-1] += (T1_ISR_count / 5);
 				//printf("%u\n", time_between_chars_typed_userA[key_i-1]);
 			
-			} else if(key_i != 0 && states_bit == 1) {
+			} else if((key_i != 0) && (states_bit == 1)) {
 				time_between_chars_typed_userB[key_i-1] += (T1_ISR_count / 5);
 				//printf("%u\n", time_between_chars_typed_userB[key_i-1]);	
 				
-			} else if( key_i != 0 && states_bit == 2) {
+			} else if( (key_i != 0) && (states_bit == 2)) {
 				time_between_chars_typed_recognize[key_i-1] = T1_ISR_count;
 				//printf("%u\n", time_between_chars_typed_recognize[key_i-1]);	
 				
@@ -128,14 +130,14 @@ void main (void) {
 			// Sequence entered correctly Logic
 			key_i = 0;
 			
-			if(states_bit == 0 || states_bit == 1)
+			if((states_bit == 0) || (states_bit == 1))
 				// It is a (Training Session)
 				trials_num --;
 			
-			if(states_bit == 0 && trials_num == 0){
+			if((states_bit == 0) && (trials_num == 0)){
 				printf("%s\n" , msg1);
 				
-			} else if(states_bit == 1 && trials_num == 0){
+			} else if((states_bit == 1) && (trials_num == 0)){
 				printf("%s\n", msg2);
 		
 			} else if(states_bit == 2) {
@@ -158,13 +160,11 @@ void main (void) {
 				}
 				
 				if(sum_sq_err_A > sum_sq_err_B) {
-					//printf("User B\n");
-					P1_1 = ~P1_1;
-					flash_counter = 2;
+					printf("User B\n");
+					flash_counter = 4;
 				} else {
-					//printf("User A\n");
-					P1_1 = ~P1_1;
-					flash_counter = 1;
+					printf("User A\n");
+					flash_counter = 2;
 				} 
 				//printf("Oh! no I can not take a guess!");
 				
